@@ -17,6 +17,15 @@ while rendering and transmitting double buffered Base64 encoded images.
 - `Z` and `z` - rotate around Z-axis
 - `w`, `a`, `s` and `d` - rotate around X-axis and Y-axis
 
+## Project Structure
+
+- `src/gl1_gears.c` - original GLFW port of the public domain gears demo.
+- `src/gl2_gears.c` - OpenGLES2 port of the public domain gears demo.
+- `src/gl2_util.h` - header functions for OpenGL ES2 buffers and shaders.
+- `src/kitty_gears.c` - OS Mesa kitty port of the public domain gears demo.
+- `src/kitty_util.h` - kitty and terminal request response and IO helpers.
+- `src/linmath.h` - public domain linear algebra header functions.
+
 ## Build Dependencies
 
 - kitty version 0.15
