@@ -7,6 +7,8 @@ then send them to the kitty terminal using the terminal graphics protocol.
 The demo uses poll to capture keyboard input and kitty protocol responses
 while rendering and transmitting double buffered Base64 encoded images.
 
+![glkitty](/images/glkitty.gif)
+
 ## Keyboard Navigation
 
 - `q` - quit
