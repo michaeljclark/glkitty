@@ -36,6 +36,10 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -54,6 +58,10 @@ static uint help = 0;
 static uint millis = 10;
 static uint animation = 1;
 static uint running = 1;
+static uint statistics = 0;
+static uint compression = 0;
+static size_t bytes_rendered = 0;
+static size_t bytes_transferred = 0;
 
 static GLfloat view_dist = -40.0f;
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
@@ -370,6 +378,8 @@ static void print_help(int argc, char **argv)
         "  -s, --frame-size <width>x<height>  window or image size (default %dx%d)\n"
         "  -i, --frame-interval <integer>     interframe delay ms (default %d)\n"
         "  -c, --frame-count <integer>        output frame count limit (default %d)\n"
+        "  -z, --compression                  enable zlib compression\n"
+        "  -x, --statistics                   print statistics on quit\n"
         "  -h, --help                         command line help\n",
         argv[0], width, height, millis, count);
 }
@@ -404,6 +414,12 @@ static void parse_options(int argc, char **argv)
         } else if (match_opt(argv[i], "-i", "--frame-interval")) {
             if (check_param(++i == argc, "--frame-interval")) break;
             millis = atoi(argv[i++]);
+        } else if (match_opt(argv[i], "-z", "--compression")) {
+            compression++;
+            i++;
+        } else if (match_opt(argv[i], "-x", "--statistics")) {
+            statistics++;
+            i++;
         } else if (match_opt(argv[i], "-h", "--help")) {
             help++;
             i++;
@@ -428,6 +444,8 @@ static int kitty_gears(int argc, char *argv[])
     OSMesaContext ctx;
     uint8_t *buffer;
     uint lh = height / 18;
+    uint frame;
+    size_t len;
     kdata k;
     pos p;
 
@@ -465,7 +483,7 @@ static int kitty_gears(int argc, char *argv[])
     hide_cursor();
 
     /* loop displaying frames */
-    for(uint frame = 0; frame < count && running; frame++)
+    for(frame = 0; frame < count && running; frame++)
     {
         /* perform OpenGL drawing*/
         draw();
@@ -475,7 +493,11 @@ static int kitty_gears(int argc, char *argv[])
         uint iid = 2 + (frame&1);
         set_position(p.x, p.y-lh);
         flip_buffer_y((uint*)buffer, width, height);
-        kitty_rgba_base64('T', iid, buffer, width, height);
+        len = kitty_rgba_base64('T', iid, compression, buffer, width, height);
+
+        /* increment data transfer counters */
+        bytes_rendered += (width * height) << 2;
+        bytes_transferred += len;
 
         /*
          * loop until we see the image id from kitty acknowledging
@@ -518,6 +540,18 @@ static int kitty_gears(int argc, char *argv[])
     /* restore termios */
     tcsetattr(0, TCSANOW, &save);
     printf("\n");
+
+    /* print statistics */
+    if (statistics) {
+        printf("frames rendered = %u\n", frame);
+        printf("data transfered = %zu (bytes)\n", bytes_transferred);
+        printf("data rendered   = %zu (bytes)\n", bytes_rendered);
+        if (bytes_transferred != bytes_rendered) {
+            float factor = (float)bytes_rendered/(float)bytes_transferred;
+            float efficiency = (1.f - 1.f/factor)*100.f;
+            printf("efficiency      = %5.2f%% (%5.2fX)\n", efficiency, factor);
+        }
+    }
 
     /* release memory and exit */
     free(buffer);

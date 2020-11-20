@@ -38,12 +38,18 @@ find_library(OPENGL_LIBRARY GL)
 find_package(PkgConfig)
 pkg_check_modules(GLFW3 REQUIRED glfw3)
 pkg_check_modules(OSMESA REQUIRED osmesa)
+pkg_check_modules(ZLIB REQUIRED zlib)
 
 add_definitions(${GLFW3_CFLAGS})
 add_definitions(${OSMESA_CFLAGS})
 
 set(OSMESA_LIBS_ALL ${OSMESA_LDFLAGS} ${EXTRA_LIBS})
 set(GLFW_LIBS_ALL ${GLFW3_LDFLAGS} ${OPENGL_LIBRARY} ${EXTRA_LIBS})
+
+if (ZLIB_FOUND)
+	list(APPEND OSMESA_LIBS_ALL ${ZLIB_LDFLAGS})
+	add_definitions(-DHAVE_ZLIB=1)
+endif (ZLIB_FOUND)
 
 if (OSMESA_FOUND)
 	add_executable(kitty_gears src/kitty_gears.c)

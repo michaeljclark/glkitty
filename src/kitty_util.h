@@ -51,24 +51,87 @@ static int base64_encode(size_t in_len, const uint8_t *in, size_t out_len, char 
 }
 
 /*
+ * zlib compression
+ */
+#ifdef HAVE_ZLIB
+typedef struct zlib_span { const uint8_t *data; size_t len; } zlib_span;
+static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len)
+{
+    zlib_span result = { NULL, 0 };
+    z_stream s = { 0 };
+    uint8_t *xdata;
+    size_t xlen;
+    int ret;
+
+    deflateInit(&s, Z_BEST_SPEED);
+    xlen = deflateBound(&s, len);
+    if (!(xdata = malloc(xlen))) {
+        return result;
+    }
+    s.avail_in = len;
+    s.next_in = (uint8_t*)data;
+    s.avail_out = xlen;
+    s.next_out = xdata;
+    do {
+        if (Z_STREAM_ERROR == (ret = deflate(&s, Z_FINISH))) {
+            free(xdata);
+            return result;
+        }
+    } while (s.avail_out == 0);
+    assert(s.avail_in == 0);
+    result.data = xdata;
+    result.len = s.total_out;
+    deflateEnd(&s);
+
+    return result;
+}
+#endif
+
+/*
  * kitty image protocol
  *
  * outputs base64 encoding of image data in a span_vector
  */
 
-static void kitty_rgba_base64(char cmd, uint32_t id,
+static size_t kitty_rgba_base64(char cmd, uint32_t id, uint32_t compression,
     const uint8_t *color_pixels, uint32_t width, uint32_t height)
 {
     const size_t chunk_limit = 4096;
 
     size_t pixel_count = width * height;
     size_t total_size = pixel_count << 2;
-    size_t base64_size = ((total_size + 2) / 3) * 4;
+    const uint8_t *encode_data;
+    size_t encode_size;
+
+#ifdef HAVE_ZLIB
+#define COMPRESSION_STRING (compression ? ",o=z" : "")
+#else
+#define COMPRESSION_STRING ""
+#endif
+
+#ifdef HAVE_ZLIB
+    /*
+     * if compression is enabled, compress data before base64 encoding.
+     */
+    if (compression) {
+        zlib_span z = kitty_zlib_compress(color_pixels, total_size);
+        if (!z.data) return 0;
+        encode_data = z.data;
+        encode_size = z.len;
+    } else {
+        encode_data = color_pixels;
+        encode_size = total_size;
+    }
+#else
+    encode_data = color_pixels;
+    encode_size = total_size;
+#endif
+
+    size_t base64_size = ((encode_size + 2) / 3) * 4;
     uint8_t *base64_pixels = (uint8_t*)alloca(base64_size+1);
 
-
     /* base64 encode the data */
-    int ret = base64_encode(total_size, color_pixels, base64_size+1, (char*)base64_pixels);
+    int ret = base64_encode(encode_size, encode_data, base64_size+1, (char*)base64_pixels);
     if (ret < 0) {
         fprintf(stderr, "error: base64_encode failed: ret=%d\n", ret);
         exit(1);
@@ -88,8 +151,8 @@ static void kitty_rgba_base64(char cmd, uint32_t id,
             ? base64_size - sent_bytes : chunk_limit;
         int cont = !!(sent_bytes + chunk_size < base64_size);
         if (sent_bytes == 0) {
-            fprintf(stdout,"\x1B_Gf=32,a=%c,i=%u,s=%d,v=%d,m=%d;",
-                cmd, id, width, height, cont);
+            fprintf(stdout,"\x1B_Gf=32,a=%c,i=%u,s=%d,v=%d,m=%d%s;",
+                cmd, id, width, height, cont, COMPRESSION_STRING);
         } else {
             fprintf(stdout,"\x1B_Gm=%d;", cont);
         }
@@ -98,6 +161,17 @@ static void kitty_rgba_base64(char cmd, uint32_t id,
         sent_bytes += chunk_size;
     }
     fflush(stdout);
+
+#ifdef HAVE_ZLIB
+    /* 
+     * carefully only free encoded data if compression is enabled, because
+     * if compression is not enabled, encoded_data is stack from alloca.
+     */
+    if (compression) {
+        free((void*)encode_data);
+    }
+#endif
+    return encode_size;
 }
 
 /*
