@@ -273,13 +273,16 @@ static kdata parse_kitty(line l)
 static void flip_buffer_y(uint32_t* buffer, uint32_t width, uint32_t height)
 {
     /* Iterate only half the buffer to get a full flip */
-    GLint rows = height >> 1;
-    uint32_t* scan_line = (uint32_t*)alloca(width * sizeof(uint32_t));
+    size_t rows = height >> 1;
+    size_t line_size = width * sizeof(uint32_t);
+    uint32_t* scan_line = (uint32_t*)alloca(line_size);
 
     for (uint32_t rowIndex = 0; rowIndex < rows; rowIndex++)
     {
-        memcpy(scan_line, buffer + rowIndex * width, width * sizeof(uint32_t));
-        memcpy(buffer + rowIndex * width, buffer + (height - rowIndex - 1) * width, width * sizeof(uint32_t));
-        memcpy(buffer + (height - rowIndex - 1) * width, scan_line, width * sizeof(uint32_t));
+        size_t l1 = rowIndex * width;
+        size_t l2 = (height - rowIndex - 1) * width;
+        memcpy(scan_line, buffer + l1, line_size);
+        memcpy(buffer + l1, buffer + l2, line_size);
+        memcpy(buffer + l2, scan_line, line_size);
     }
 }
