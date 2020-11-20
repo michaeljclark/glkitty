@@ -19,7 +19,8 @@
 static const uint8_t base64enc_tab[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static int base64_encode(size_t in_len, const uint8_t *in, size_t out_len, char *out)
+static int base64_encode
+    (size_t in_len, const uint8_t *in, size_t out_len, char *out)
 {
     uint ii, io;
     uint_least32_t v;
@@ -54,9 +55,11 @@ static int base64_encode(size_t in_len, const uint8_t *in, size_t out_len, char 
  * zlib compression
  */
 #ifdef HAVE_ZLIB
+
 typedef struct zlib_span { const uint8_t *data; size_t len; } zlib_span;
-static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len,
-    uint32_t compression)
+
+static zlib_span kitty_zlib_compress
+    (const uint8_t *data, size_t len, uint32_t compression)
 {
     zlib_span result = { NULL, 0 };
     z_stream s = { 0 };
@@ -86,6 +89,7 @@ static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len,
 
     return result;
 }
+
 #endif
 
 /*
@@ -94,7 +98,8 @@ static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len,
  * outputs base64 encoding of image data in a span_vector
  */
 
-static size_t kitty_rgba_base64(char cmd, uint32_t id, uint32_t compression,
+static size_t kitty_rgba_base64
+    (char cmd, uint32_t id, uint32_t compression,
     const uint8_t *color_pixels, uint32_t width, uint32_t height)
 {
     const size_t chunk_limit = 4096;
@@ -133,7 +138,8 @@ static size_t kitty_rgba_base64(char cmd, uint32_t id, uint32_t compression,
     uint8_t *base64_pixels = (uint8_t*)alloca(base64_size+1);
 
     /* base64 encode the data */
-    int ret = base64_encode(encode_size, encode_data, base64_size+1, (char*)base64_pixels);
+    int ret = base64_encode(encode_size, encode_data, base64_size+1,
+        (char*)base64_pixels);
     if (ret < 0) {
         fprintf(stderr, "error: base64_encode failed: ret=%d\n", ret);
         exit(1);
@@ -270,7 +276,8 @@ static kdata parse_kitty(line l)
 /*
  * flip image buffer y-axis
  */
-static void flip_buffer_y(uint32_t* buffer, uint32_t width, uint32_t height)
+static void flip_buffer_y
+    (uint32_t* buffer, uint32_t width, uint32_t height)
 {
     /* Iterate only half the buffer to get a full flip */
     size_t rows = height >> 1;
