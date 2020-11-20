@@ -27,6 +27,13 @@ ZLib compression is enabled with the the `-z` flag.
 - `src/kitty_util.h` - kitty and terminal request response and IO helpers.
 - `src/linmath.h` - public domain linear algebra header functions.
 
+## Licensing Information
+
+- Mesa gears is public domain software, Brian Paul et al.
+- gl2_util header is ISC license, Michael Clark.
+- kitty_util header is please license, Michael Clark.
+- base64_encode is public domain software, Jon Mayo.
+
 ## Build Dependencies
 
 - kitty version 0.15
