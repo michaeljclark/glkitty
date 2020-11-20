@@ -95,7 +95,7 @@ static zlib_span kitty_zlib_compress
 /*
  * kitty image protocol
  *
- * outputs base64 encoding of image data in a span_vector
+ * outputs base64 encoding of image data
  */
 
 static size_t kitty_rgba_base64
