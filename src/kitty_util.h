@@ -55,7 +55,8 @@ static int base64_encode(size_t in_len, const uint8_t *in, size_t out_len, char 
  */
 #ifdef HAVE_ZLIB
 typedef struct zlib_span { const uint8_t *data; size_t len; } zlib_span;
-static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len)
+static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len,
+    uint32_t compression)
 {
     zlib_span result = { NULL, 0 };
     z_stream s = { 0 };
@@ -63,7 +64,7 @@ static zlib_span kitty_zlib_compress(const uint8_t *data, size_t len)
     size_t xlen;
     int ret;
 
-    deflateInit(&s, Z_BEST_SPEED);
+    deflateInit(&s, compression > 1 ? Z_BEST_COMPRESSION : Z_BEST_SPEED);
     xlen = deflateBound(&s, len);
     if (!(xdata = malloc(xlen))) {
         return result;
@@ -102,6 +103,7 @@ static size_t kitty_rgba_base64(char cmd, uint32_t id, uint32_t compression,
     size_t total_size = pixel_count << 2;
     const uint8_t *encode_data;
     size_t encode_size;
+    zlib_span z;
 
 #ifdef HAVE_ZLIB
 #define COMPRESSION_STRING (compression ? ",o=z" : "")
@@ -114,7 +116,7 @@ static size_t kitty_rgba_base64(char cmd, uint32_t id, uint32_t compression,
      * if compression is enabled, compress data before base64 encoding.
      */
     if (compression) {
-        zlib_span z = kitty_zlib_compress(color_pixels, total_size);
+        z = kitty_zlib_compress(color_pixels, total_size, compression);
         if (!z.data) return 0;
         encode_data = z.data;
         encode_size = z.len;

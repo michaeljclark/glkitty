@@ -415,7 +415,10 @@ static void parse_options(int argc, char **argv)
             if (check_param(++i == argc, "--frame-interval")) break;
             millis = atoi(argv[i++]);
         } else if (match_opt(argv[i], "-z", "--compression")) {
-            compression++;
+            compression += 1;
+            i++;
+        } else if (match_opt(argv[i], "-9", "--zz")) {
+            compression += 2;
             i++;
         } else if (match_opt(argv[i], "-x", "--statistics")) {
             statistics++;
