@@ -44,21 +44,6 @@ for constructing the model, view and projection matrices. `"gl2_util.h"`
 contains shader loading and a simple vertex and index buffer implementation.
 The code uses vertex array objects and vertex buffer objects.
 
-## Keyboard Navigation
-
-- `q` - quit
-- `x` - toggle animation on/off
-- `C` and `c` - zoom in or out
-- `Z` and `z` - rotate around Z-axis
-- `w`, `a`, `s` and `d` - rotate around X-axis and Y-axis
-
-## Licensing Information
-
-- Mesa gears is public domain software, Brian Paul et al.
-- gl2_util header is ISC license, Michael Clark.
-- kitty_util header is please license, Michael Clark.
-- base64_encode is public domain software, Jon Mayo.
-
 ## Build Instructions
 
 The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
@@ -82,3 +67,18 @@ cmake --build build
 ```
 ./build/kitty_gears -s 512x512
 ```
+
+## Keyboard Navigation
+
+- `q` - quit
+- `x` - toggle animation on/off
+- `C` and `c` - zoom in or out
+- `Z` and `z` - rotate around Z-axis
+- `w`, `a`, `s` and `d` - rotate around X-axis and Y-axis
+
+## Licensing Information
+
+- Mesa gears is public domain software, Brian Paul et al.
+- gl2_util header is ISC license, Michael Clark.
+- kitty_util header is please license, Michael Clark.
+- base64_encode is public domain software, Jon Mayo.
