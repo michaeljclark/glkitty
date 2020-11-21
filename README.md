@@ -59,15 +59,15 @@ The code uses vertex array objects and vertex buffer objects.
 - kitty_util header is please license, Michael Clark.
 - base64_encode is public domain software, Jon Mayo.
 
-## Build Dependencies
+## Build Instructions
+
+The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
+
+#### Build Dependencies
 
 - kitty version 0.15
 - libosmesa - Mesa Off-screen rendering extension
 - gcc, cmake, Ninja
-
-## Build Instructions
-
-- Tested on Ubuntu 20.04.1 LTS (Focal Fossa)
 
 #### Building the demo
 
