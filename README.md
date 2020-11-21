@@ -2,21 +2,16 @@
 
 Port of the OpenGL gears demo to kitty terminal graphics protocol.
 
-_kitty_gears_ uses off-secreen OpenGL to render images into a buffer and
-then send them to the kitty terminal using the terminal graphics protocol.
-The demo uses poll to capture keyboard input and kitty protocol responses
-while rendering and transmitting double buffered Base64 encoded images.
-ZLib compression is enabled with the the `-z` flag.
-
 ![glkitty](/images/glkitty.gif)
 
-## Keyboard Navigation
+## Introduction
 
-- `q` - quit
-- `x` - toggle animation on/off
-- `C` and `c` - zoom in or out
-- `Z` and `z` - rotate around Z-axis
-- `w`, `a`, `s` and `d` - rotate around X-axis and Y-axis
+_glkitty_ is a nano framework for creating kitty terminal apps that send
+image data to kitty using the kitty terminal graphics protocol.
+
+_kitty_gears_ is a demo app for  _kitty_util.h_ and _gl2_util.h_ which
+are designed to make using the OpenGL ES2 programmable shader pipeline
+tractible for small self-contained demos running with _kitty_.
 
 ## Project Structure
 
@@ -26,6 +21,36 @@ ZLib compression is enabled with the the `-z` flag.
 - `src/kitty_gears.c` - OS Mesa kitty port of the public domain gears demo.
 - `src/kitty_util.h` - kitty and terminal request response and IO helpers.
 - `src/linmath.h` - public domain linear algebra header functions.
+
+### kitty_gears
+
+_kitty_gears_ uses off-screen OpenGL to render images into a buffer and
+then send them to the kitty terminal using the terminal graphics protocol.
+The demo uses poll to capture keyboard input and kitty protocol responses
+while rendering and transmitting double buffered Base64 encoded images.
+ZLib compression is enabled with the the `-z` flag.
+
+### gl1_gears
+
+_gl1_gears_ is the OpenGL 1.0 port of gears using immediate mode
+vertices, call lists and the fixed function lighting model. This
+code is derived from the gears port included with GLFW.
+
+### gl2_gears
+
+_gl2_gears_ is the OpenGL 2.0 port of gears using GLSL shaders.
+It has been ported to use Wolfgang Draxinger's `"linmath.h"` `mat4x4`
+for constructing the model, view and projection matrices. `"gl2_util.h"`
+contains shader loading and a simple vertex and index buffer implementation.
+The code uses vertex array objects and vertex buffer objects.
+
+## Keyboard Navigation
+
+- `q` - quit
+- `x` - toggle animation on/off
+- `C` and `c` - zoom in or out
+- `Z` and `z` - rotate around Z-axis
+- `w`, `a`, `s` and `d` - rotate around X-axis and Y-axis
 
 ## Licensing Information
 
