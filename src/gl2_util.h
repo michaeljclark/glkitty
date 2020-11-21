@@ -22,9 +22,9 @@
 
 typedef unsigned uint;
 
-typedef union { float vec[2]; struct { float x, y;       } m; } vec2f;
-typedef union { float vec[3]; struct { float x, y, z;    } m; } vec3f;
-typedef union { float vec[4]; struct { float x, y, z, w; } m; } vec4f;
+typedef union { float vec[2]; struct { float x, y;       }; struct { float r, g;       }; } vec2f;
+typedef union { float vec[3]; struct { float x, y, z;    }; struct { float r, g, b;    }; } vec3f;
+typedef union { float vec[4]; struct { float x, y, z, w; }; struct { float r, g, b, a; }; } vec4f;
 
 typedef struct
 {
