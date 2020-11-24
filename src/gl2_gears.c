@@ -33,9 +33,13 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_GLAD
+#include <glad/glad.h>
+#else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
+#endif
 #include <GLFW/glfw3.h>
 
 #include "linmath.h"
@@ -381,6 +385,10 @@ int main(int argc, char *argv[])
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     glfwGetFramebufferSize(window, &width, &height);
+
+#ifdef HAVE_GLAD
+    gladLoadGL();
+#endif
 
     init();
     reshape(window, width, height);

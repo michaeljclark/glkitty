@@ -22,6 +22,10 @@ tractible for small self-contained demos running with _kitty_.
 - `src/kitty_util.h` - kitty and terminal request response and IO helpers.
 - `src/linmath.h` - public domain linear algebra header functions.
 
+## Examples
+
+The project includes several versions of gears ported to multiple APIs.
+
 ### kitty_gears
 
 _kitty_gears_ uses off-screen OpenGL to render images into a buffer and
@@ -54,11 +58,34 @@ The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
 - libosmesa - Mesa Off-screen rendering extension
 - gcc, cmake, Ninja
 
-#### Building the demo
+Use the following command to install dependencies on _Ubuntu 20.04_:
 
 ```
-sudo apt-get install -y cmake ninja-build libosmesa6-dev
-cmake -G Ninja -B build .
+sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev
+```
+
+#### Building the demo
+
+The following cmake variables control which examples are built:
+
+- `-DOSMESA_EXAMPLES=ON` - build the OSMesa examples (`kitty_gears`)
+- `-DOPENGL_EXAMPLES=ON` - build the OpenGL examples (`gl1_gears`, `gl2_gears`)
+- `-DEXTERNAL_GLFW=ON` - build using external GLFW library
+- `-DEXTERNAL_GLAD=ON` - build using external GLAD library
+
+By default, the project will build _kitty_gears_ along with downloading and
+building the GLFW and GLAD dependencies and build the OpenGL and Vulkan ports.
+The follow command will build all examples if required libraries are present:
+
+```
+cmake -G Ninja -B build
+cmake --build build
+```
+
+The host GLFW library can be used by overriding the appropriate cmake options:
+
+```
+cmake -G Ninja -B build -DEXTERNAL_GLFW=OFF -DEXTERNAL_GLAD=OFF
 cmake --build build
 ```
 
