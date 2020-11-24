@@ -28,6 +28,7 @@ find_package(PkgConfig)
 pkg_check_modules(OSMESA REQUIRED osmesa)
 pkg_check_modules(GLFW3 REQUIRED glfw3)
 pkg_check_modules(ZLIB REQUIRED zlib)
+pkg_check_modules(VULKAN REQUIRED vulkan)
 
 # Find OpenGL library
 include(FindOpenGL)
@@ -49,6 +50,7 @@ endif ()
 # user configurable options
 option(OSMESA_EXAMPLES "Build OSMesa examples" ${OSMESA_EXAMPLES_DEFAULT})
 option(OPENGL_EXAMPLES "Build OpenGL examples" ${OPENGL_EXAMPLES_DEFAULT})
+option(VULKAN_EXAMPLES "Build Vulkan examples" ${VULKAN_EXAMPLES_DEFAULT})
 option(EXTERNAL_GLFW "Use external GLFW project" ON)
 option(EXTERNAL_GLAD "Use external GLAD project" ON)
 
@@ -139,3 +141,49 @@ if (OPENGL_EXAMPLES)
         target_link_libraries(gl2_gears ${GLAD_LIBRARIES})
     endif ()
 endif (OPENGL_EXAMPLES)
+
+# ▗▄     ▗▄           ▐███      ▐█
+# ▝█▌    ▟█           ▝▀▜█      ▐█
+#  █▌    █▌             ▐█      ▐█
+#  ▐█   ▗█▘  █▌   ▐▌    ▐█      ▐█   ▟▛   ▄███▄    █▌▄██▄
+#  ▐█   ▐█   █▌   ▐▌    ▐█      ▐█  ▟▛   ▐█▀▀▀█▙   █▙▛▀▜█▖
+#   █▌  ▟▛   █▌   ▐▌    ▐█      ▐█ ▟▛    ▝    ▝█   █▛   █▌
+#   ▜▙  █▌   █▌   ▐▌    ▐█      ▐█▟█       ▄▄▄▄█▖  █▌   ▜▌
+#   ▐█ ▐█    █▌   ▐▌    ▐█      ▐█▛█▙    ▗██████▌  █▌   ▐▌
+#   ▝█▖▐▛    █▌   █▌    ▐█      ▐█ ▝█▖   █▛▘   █▌  █▌   ▐▌
+#    █▌█▌    █▙  ▗█▌    ▐█      ▐█  ▜█▖  █▌   ▐█▌  █▌   ▐▌
+#    ▐██▘    ▐█▄▄█▜▌     █▙▄▄   ▐█   ▜▙  ▜█▄▄▟▛█▌  █▌   ▐▌
+#    ▝██      ▜██▘▐▌     ▝███   ▐█   ▝█▌  ▜██▀ █▌  █▌   ▐▌
+
+set (VULKAN_SDK "/opt/vulkan/1.2.154.0/x86_64")
+find_program (GLSL_LANG_VALIDATOR NAMES glslangValidator PATHS ${VULKAN_SDK}/bin)
+set (SHADER_DIR shaders)
+
+if(NOT VULKAN_FOUND)
+    message("Vulkan library not found")
+    set(VULKAN_EXAMPLES 0)
+elseif(NOT GLSL_LANG_VALIDATOR)
+    message("glslangValidator not found")
+    set(VULKAN_EXAMPLES 0)
+endif()
+
+if (VULKAN_EXAMPLES)
+    file(GLOB_RECURSE VERTEX_SHADER_SOURCE "${SHADER_DIR}/*.vert")
+    file(GLOB_RECURSE FRAGMENT_SHADER_SOURCE "${SHADER_DIR}/*.frag")
+    set(SHADER_SOURCE ${VERTEX_SHADER_SOURCE} ${FRAGMENT_SHADER_SOURCE})
+    source_group("shaders" FILES ${SHADER_SOURCE})
+
+    foreach(shader ${SHADER_SOURCE})
+        add_custom_command(OUTPUT ${shader}.spv DEPENDS ${shader}
+            COMMAND ${GLSL_LANG_VALIDATOR} -V ${shader} -o ${shader}.spv)
+        list(APPEND SHADERS ${shader}.spv)
+    endforeach(shader)
+
+    message("-- Adding: vk1_gears")
+    add_executable(vk1_gears src/vk1_gears.c ${SHADERS})
+    target_link_libraries(vk1_gears vulkan ${GLFW_LIBS_ALL})
+
+    if (EXTERNAL_GLFW)
+        add_dependencies(vk1_gears GLFW-build)
+    endif ()
+endif (VULKAN_EXAMPLES)

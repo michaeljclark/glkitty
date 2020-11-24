@@ -48,11 +48,17 @@ for constructing the model, view and projection matrices. `"gl2_util.h"`
 contains shader loading and a simple vertex and index buffer implementation.
 The code uses vertex array objects and vertex buffer objects.
 
+### vk1_gears
+
+vk1_gears is a Vulkan port of gears which includes options for api dump,
+validation, variable swapchain images and variable sample buffers.
+This is a very early prototype.
+
 ## Build Instructions
 
 The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
 
-#### Build Dependencies
+#### Building dependencies
 
 - kitty version 0.15
 - libosmesa - Mesa Off-screen rendering extension
@@ -61,35 +67,36 @@ The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
 Use the following command to install dependencies on _Ubuntu 20.04_:
 
 ```
-sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev
+sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev libvulkan-dev
 ```
 
 #### Building the demo
 
 The following cmake variables control which examples are built:
 
-- `-DOSMESA_EXAMPLES=ON` - build the OSMesa examples (`kitty_gears`)
-- `-DOPENGL_EXAMPLES=ON` - build the OpenGL examples (`gl1_gears`, `gl2_gears`)
+- `-DOSMESA_EXAMPLES=ON` - build the OSMesa examples: `kitty_gears`
+- `-DOPENGL_EXAMPLES=ON` - build the OpenGL examples: `gl1_gears`, `gl2_gears`
+- `-DVULKAN_EXAMPLES=ON` - build the Vulkan examples: `vk1_gears`
 - `-DEXTERNAL_GLFW=ON` - build using external GLFW library
 - `-DEXTERNAL_GLAD=ON` - build using external GLAD library
 
-By default, the project will build _kitty_gears_ along with downloading and
-building the GLFW and GLAD dependencies and build the OpenGL and Vulkan ports.
-The follow command will build all examples if required libraries are present:
+By default, the project will build _kitty_gears_ as well as the OpenGL ports
+_gl1_gears, _gl2_gears_ and the Vulkan port _vk1_gears_. This command will
+download required dependencoes such as GLFW and build all of the examples:
 
 ```
 cmake -G Ninja -B build
 cmake --build build
 ```
 
-The host GLFW library can be used by overriding the appropriate cmake options:
+The host GLFW library can be used by overriding appropriate cmake options:
 
 ```
 cmake -G Ninja -B build -DEXTERNAL_GLFW=OFF -DEXTERNAL_GLAD=OFF
 cmake --build build
 ```
 
-#### Running the demo:
+#### Running the demo
 
 ```
 ./build/kitty_gears -s 512x512
