@@ -113,7 +113,7 @@ static zlib_span kitty_zlib_compress
  * outputs base64 encoding of image data
  */
 
-static size_t kitty_rgba_base64
+static size_t kitty_send_rgba
     (char cmd, uint32_t id, uint32_t compression,
     const uint8_t *color_pixels, uint32_t width, uint32_t height)
 {
@@ -209,7 +209,7 @@ typedef struct line line;
 typedef struct kdata kdata;
 typedef struct pos pos;
 
-static line recv_term(int timeout)
+static line kitty_recv_term(int timeout)
 {
     line l = { 0, { 0 }};
     int r;
@@ -234,38 +234,38 @@ static line recv_term(int timeout)
     return l;
 }
 
-static line send_term(const char* s)
+static line kitty_send_term(const char* s)
 {
     fputs(s, stdout);
     fflush(stdout);
-    return recv_term(-1);
+    return kitty_recv_term(-1);
 }
 
-static void set_position(int x, int y)
+static void kitty_set_position(int x, int y)
 {
     printf("\x1B[%d;%dH", y, x);
     fflush(stdout);
 }
 
-static pos get_position()
+static pos kitty_get_position()
 {
     pos p;
-    line l = send_term("\x1B[6n");
+    line l = kitty_send_term("\x1B[6n");
     int r = sscanf(l.buf+1, "[%d;%dR", &p.y, &p.x);
     return p;
 }
 
-static void hide_cursor()
+static void kitty_hide_cursor()
 {
     puts("\x1B[?25l");
 }
 
-static void show_cursor()
+static void kitty_show_cursor()
 {
     puts("\x1B[?25h");
 }
 
-static kdata parse_kitty(line l)
+static kdata kitty_parse_response(line l)
 {
     /*
      * parse kitty response of the form: "\x1B_Gi=<image_id>;OK\x1B\\"
@@ -291,7 +291,7 @@ static kdata parse_kitty(line l)
 /*
  * flip image buffer y-axis
  */
-static void flip_buffer_y
+static void kitty_flip_buffer_y
     (uint32_t* buffer, uint32_t width, uint32_t height)
 {
     /* Iterate only half the buffer to get a full flip */
@@ -307,4 +307,75 @@ static void flip_buffer_y
         memcpy(buffer + l1, buffer + l2, line_size);
         memcpy(buffer + l2, scan_line, line_size);
     }
+}
+
+typedef void (*key_cb)(int k);
+
+static key_cb* _get_key_callback()
+{
+    static key_cb cb;
+    return &cb;
+}
+
+static void kitty_key_callback(key_cb cb)
+{
+    *_get_key_callback() = cb;
+}
+
+static void kitty_poll_events(int millis)
+{
+    kdata k;
+
+    /*
+     * loop until we see the image id from kitty acknowledging
+     * the image upload. keypresses can arrive on their own,
+     * or before or after the image id response from kitty.
+     */
+    do {
+        k = kitty_parse_response(kitty_recv_term(millis));
+        /* handle keypress present at the beginning of the response */
+        if (k.offset == 2) {
+            (*_get_key_callback())(k.data.buf[0]);
+        }
+        /* handle keypress present at the end of the response */
+        if (k.offset == 1) {
+            char *ok = strstr(k.data.buf + k.offset, ";OK\x1B\\");
+            ptrdiff_t ko = (ok != NULL) ? ((ok - k.data.buf) + 5) : 0;
+            if (k.data.r > ko) {
+                (*_get_key_callback())(k.data.buf[ko]);
+            }
+        }
+        /* handle keypress on its own */
+        if (k.offset == 0 && k.data.r == 1) {
+            (*_get_key_callback())(k.data.buf[0]);
+        }
+        /* loop once more for a keypress, if we got our image id */
+    } while (k.iid > 0);
+
+}
+
+static struct termios* _get_termios_backup()
+{
+    static struct termios backup;
+    return &backup;
+}
+
+static struct termios* _get_termios_raw()
+{
+    static struct termios raw;
+    cfmakeraw(&raw);
+    return &raw;
+}
+
+static void kitty_setup_termios()
+{
+    /* save termios and set to raw */
+    tcgetattr(0, _get_termios_backup());
+    tcsetattr(0, TCSANOW, _get_termios_raw());
+}
+
+static void kitty_restore_termios()
+{
+    /* restore termios */
+    tcsetattr(0, TCSANOW, _get_termios_backup());
 }

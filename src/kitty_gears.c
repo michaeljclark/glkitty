@@ -449,7 +449,6 @@ static int kitty_gears(int argc, char *argv[])
     uint lh = height / 18;
     uint frame;
     size_t len;
-    kdata k;
     pos p;
 
     /* Create an RGBA-mode context */
@@ -470,78 +469,43 @@ static int kitty_gears(int argc, char *argv[])
         return 0;
     }
 
+    kitty_key_callback(keystroke);
+
     init();
     reshape(width, height);
 
     for (uint i=0; i < lh; i++) printf("\n");
 
-    /* save termios and set to raw */
-    struct termios save, raw;
-    tcgetattr(0, &save);
-    cfmakeraw(&raw);
-    tcsetattr(0, TCSANOW, &raw);
-
-    /* save cursor position then hide cursor */
-    p = get_position();
-    hide_cursor();
+    kitty_setup_termios();
+    p = kitty_get_position();
+    kitty_hide_cursor();
 
     /* loop displaying frames */
     for(frame = 0; frame < count && running; frame++)
     {
-        /* perform OpenGL drawing*/
         draw();
         glFlush();
 
         /* flip buffer and output to kitty as base64 RGBA data*/
         uint iid = 2 + (frame&1);
-        set_position(p.x, p.y-lh);
-        flip_buffer_y((uint*)buffer, width, height);
-        len = kitty_rgba_base64('T', iid, compression, buffer, width, height);
+        kitty_set_position(p.x, p.y-lh);
+        kitty_flip_buffer_y((uint*)buffer, width, height);
+        len = kitty_send_rgba('T', iid, compression, buffer, width, height);
 
-        /* increment data transfer counters */
         bytes_rendered += (width * height) << 2;
         bytes_transferred += len;
 
-        /*
-         * loop until we see the image id from kitty acknowledging
-         * the image upload. keypresses can arrive on their own,
-         * or before or after the image id response from kitty.
-         */
-        do {
-            k = parse_kitty(recv_term(millis));
-            /* handle keypress present at the beginning of the response */
-            if (k.offset == 2) {
-                keystroke(k.data.buf[0]);
-            }
-            /* handle keypress present at the end of the response */
-            if (k.offset == 1) {
-                char *ok = strstr(k.data.buf + k.offset, ";OK\x1B\\");
-                ptrdiff_t ko = (ok != NULL) ? ((ok - k.data.buf) + 5) : 0;
-                if (k.data.r > ko) {
-                    keystroke(k.data.buf[ko]);
-                }
-            }
-            /* handle keypress on its own */
-            if (k.offset == 0 && k.data.r == 1) {
-                keystroke(k.data.buf[0]);
-            }
-            /* loop once more for a keypress, if we got our image id */
-        } while (k.iid > 0);
+        kitty_poll_events(millis);
         animate();
     }
 
     /* drain kitty responses */
-    do { k = parse_kitty(recv_term(millis)); } while (k.iid > 0);
+    kitty_poll_events(millis);
 
     /* restore cursor position then show cursor */
-    show_cursor();
-    set_position(p.x, p.y);
-
-    /* destroy the context */
-    OSMesaDestroyContext( ctx );
-
-    /* restore termios */
-    tcsetattr(0, TCSANOW, &save);
+    kitty_show_cursor();
+    kitty_set_position(p.x, p.y);
+    kitty_restore_termios();
     printf("\n");
 
     /* print statistics */
@@ -557,6 +521,7 @@ static int kitty_gears(int argc, char *argv[])
     }
 
     /* release memory and exit */
+    OSMesaDestroyContext(ctx);
     free(buffer);
     exit(EXIT_SUCCESS);
 }
