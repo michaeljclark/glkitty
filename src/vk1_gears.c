@@ -511,6 +511,10 @@ static void gears_create_window(gears_app *app)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwSetErrorCallback(gears_glfw_error);
+
+    glfwWindowHint(GLFW_DEPTH_BITS, 16);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+
     app->window = glfwCreateWindow(app->width, app->height, "VK1 Gears",
         NULL, NULL);
     if (!app->window) {
@@ -1843,9 +1847,9 @@ static void gears_reset_command_buffers(gears_app *app)
 static void gears_record_command_buffers(gears_app *app, size_t j)
 {
     VkClearValue clear_values[] = {
-        { .color = { { 0.0f, 0.0f, 0.0f, 1.0f } } },
+        { .color = { { 0.0f, 0.0f, 0.0f, 0.0f } } },
         { .depthStencil = { .depth = 1.0f, .stencil = 0 } },
-        { .color = { { 0.0f, 0.0f, 0.0f, 1.0f } } },
+        { .color = { { 0.0f, 0.0f, 0.0f, 0.0f } } },
     };
 
     VkRenderPassBeginInfo pass = {
@@ -1903,7 +1907,7 @@ static void gears_record_command_buffers(gears_app *app, size_t j)
 
 static void gears_init(gears_app *app, const int argc, const char **argv)
 {
-    gears_init_app(app, argv[0], 300, 300);
+    gears_init_app(app, argv[0], 512, 512);
     gears_parse_options(app, argc, argv);
     gears_init_glfw(app);
     gears_create_window(app);
