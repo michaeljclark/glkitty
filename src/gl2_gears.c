@@ -258,13 +258,12 @@ static void draw(void)
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    uniform_matrix_4fv("u_view", (const GLfloat *)v);
     for(size_t i = 0; i < 3; i++) {
         glBindVertexArray(vao[i]);
         uniform_matrix_4fv("u_model", (const GLfloat *)gm[i]);
-        uniform_matrix_4fv("u_view", (const GLfloat *)v);
         glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[i]);
-        glBindVertexArray(vao[i]);
         glDrawElements(GL_TRIANGLES, (GLsizei)ib[i].count, GL_UNSIGNED_INT, (void*)0);
     }
 }
@@ -312,8 +311,8 @@ static void init(void)
     gear(&vb[2], &ib[2], 1.3f, 2.f, 0.5f, 10, 0.7f,(vec4f){0.2f, 0.2f, 1.f, 1.f});
 
     /* create vertex array, vertex buffer and index buffer objects */
+    glGenVertexArrays(3, vao);
     for (size_t i = 0; i < 3; i++) {
-        glGenVertexArrays(1, &vao[i]);
         glBindVertexArray(vao[i]);
         vertex_buffer_create(&vbo[i], GL_ARRAY_BUFFER, vb[i].data, vb[i].count * sizeof(vertex));
         vertex_buffer_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib[i].data, ib[i].count * sizeof(uint));
