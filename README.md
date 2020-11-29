@@ -36,17 +36,21 @@ ZLib compression is enabled with the the `-z` flag.
 
 ### gl1_gears
 
-_gl1_gears_ is the OpenGL 1.0 port of gears using immediate mode
+_gl1_gears_ is the OpenGL 1.x port of gears using immediate mode
 vertices, call lists and the fixed function lighting model. This
 code is derived from the gears port included with GLFW.
 
 ### gl2_gears
 
-_gl2_gears_ is the OpenGL 2.0 port of gears using GLSL shaders.
+_gl2_gears_ is the OpenGL 2.x port of gears using GLSL shaders.
 It has been ported to use Wolfgang Draxinger's `"linmath.h"` `mat4x4`
 for constructing the model, view and projection matrices. `"gl2_util.h"`
 contains shader loading and a simple vertex and index buffer implementation.
-The code uses vertex array objects and vertex buffer objects.
+
+### gl3_gears
+
+_gl3_gears_ is mostly the same as _gl2_gears_ with the addition of vertex
+array objects which were added in OpenGL 3.x.
 
 ### vk1_gears
 

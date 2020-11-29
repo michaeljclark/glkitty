@@ -54,7 +54,7 @@ static GLfloat angle = 0.f;
 static int animation = 1;
 
 static GLuint program;
-static GLuint vbo[3], ibo[3];
+static GLuint vao[3], vbo[3], ibo[3];
 static vertex_buffer vb[3];
 static index_buffer ib[3];
 static mat4x4 gm[3], m, v, p, mvp;
@@ -260,13 +260,10 @@ static void draw(void)
 
     uniform_matrix_4fv("u_view", (const GLfloat *)v);
     for(size_t i = 0; i < 3; i++) {
+        glBindVertexArray(vao[i]);
         uniform_matrix_4fv("u_model", (const GLfloat *)gm[i]);
         glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[i]);
-        vertex_array_pointer("a_pos", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,pos));
-        vertex_array_pointer("a_normal", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,norm));
-        vertex_array_pointer("a_uv", 2, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,uv));
-        vertex_array_pointer("a_color", 4, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,col));
         glDrawElements(GL_TRIANGLES, (GLsizei)ib[i].count, GL_UNSIGNED_INT, (void*)0);
     }
 }
@@ -314,9 +311,15 @@ static void init(void)
     gear(&vb[2], &ib[2], 1.3f, 2.f, 0.5f, 10, 0.7f,(vec4f){0.2f, 0.2f, 1.f, 1.f});
 
     /* create vertex array, vertex buffer and index buffer objects */
+    glGenVertexArrays(3, vao);
     for (size_t i = 0; i < 3; i++) {
+        glBindVertexArray(vao[i]);
         vertex_buffer_create(&vbo[i], GL_ARRAY_BUFFER, vb[i].data, vb[i].count * sizeof(vertex));
         vertex_buffer_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib[i].data, ib[i].count * sizeof(uint));
+        vertex_array_pointer("a_pos", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,pos));
+        vertex_array_pointer("a_normal", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,norm));
+        vertex_array_pointer("a_uv", 2, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,uv));
+        vertex_array_pointer("a_color", 4, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,col));
     }
 
     /* set light position uniform */
