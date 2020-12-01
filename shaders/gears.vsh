@@ -1,9 +1,9 @@
 #version 140
 
-attribute vec3 a_pos;
-attribute vec3 a_normal;
-attribute vec2 a_uv;
-attribute vec4 a_color;
+in vec3 a_pos;
+in vec3 a_normal;
+in vec2 a_uv;
+in vec4 a_color;
 
 uniform mat4 u_projection;
 uniform mat4 u_model;

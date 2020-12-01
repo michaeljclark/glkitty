@@ -1409,19 +1409,19 @@ static void gears_create_pipeline(gears_app *app)
     };
     const VkVertexInputAttributeDescription va[4] = {
         {
-            .location = 0,
+            .location = 1,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32_SFLOAT,
             .offset = offsetof(gears_vertex,pos),
         },
         {
-            .location = 1,
+            .location = 2,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32_SFLOAT,
             .offset = offsetof(gears_vertex,norm),
         },
         {
-            .location = 2,
+            .location = 4,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32A32_SFLOAT,
             .offset = offsetof(gears_vertex,col),
