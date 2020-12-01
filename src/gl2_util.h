@@ -332,7 +332,12 @@ static buffer load_file(const char *filename)
     return (buffer){buf, (size_t)statbuf.st_size};
 }
 
-/* OpenGL 4.x stuff */
+/*
+ * code in this header assumes OpenGL 3.2 and OpenGL ES 3.1 as dependencies
+ * that can be statically linked. given the code support multiple loaders,
+ * OpenGL 4.x functions are resolved here and the scope is currently limited
+ * to linking and loading of shaders themselves, which are runtime linked.
+ */
 
 typedef void (*func_4_1_glShaderBinary)
 (GLsizei, const GLuint *, GLenum, const void *, GLsizei);
