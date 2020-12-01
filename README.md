@@ -52,6 +52,11 @@ contains shader loading and a simple vertex and index buffer implementation.
 _gl3_gears_ is mostly the same as _gl2_gears_ with the addition of vertex
 array objects which were added in OpenGL 3.x.
 
+### gl4_gears
+
+_gl4_gears_ is mostly the same as _gl3_gears_ with the addition of uniform
+buffer objects and SPIR-V binary shaders which were added in OpenGL 4.x.
+
 ### vk1_gears
 
 vk1_gears is a Vulkan port of gears which includes options for api dump,
