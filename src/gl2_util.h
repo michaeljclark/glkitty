@@ -351,6 +351,10 @@ static func_4_6_glSpecializeShader       muglSpecializeShader;
 #define muglGetProcAddress glfwGetProcAddress
 #elif defined (GLX_VERSION)
 #define muglGetProcAddress glXGetProcAddress
+#elif defined (WGL_VERSION_1_0)
+#define muglGetProcAddress wglGetProcAddress
+#elif defined (EGL_VERSION)
+#define muglGetProcAddress eglGetProcAddress
 #endif
 
 static void muglInit()
