@@ -346,11 +346,11 @@ static func_4_3_glGetProgramResourceName muglGetProgramResourceName;
 static func_4_6_glSpecializeShader       muglSpecializeShader;
 
 #if defined (OSMESA_MAJOR_VERSION)
-#define muGetProcAddress OSMesaGetProcAddress
+#define muglGetProcAddress OSMesaGetProcAddress
 #elif defined (GLFW_VERSION_MAJOR)
-#define muGetProcAddress glfwGetProcAddress
+#define muglGetProcAddress glfwGetProcAddress
 #elif defined (GLX_VERSION)
-#define muGetProcAddress glXGetProcAddress
+#define muglGetProcAddress glXGetProcAddress
 #endif
 
 static void muglInit()
@@ -360,11 +360,11 @@ static void muglInit()
     if (initialized) return;
 
     muglShaderBinary = (func_4_1_glShaderBinary)
-        muGetProcAddress("glShaderBinary");
+        muglGetProcAddress("glShaderBinary");
     muglGetProgramResourceName = (func_4_3_glGetProgramResourceName)
-        muGetProcAddress("glGetProgramResourceName");
+        muglGetProcAddress("glGetProgramResourceName");
     muglSpecializeShader = (func_4_6_glSpecializeShader)
-        muGetProcAddress("glSpecializeShader");
+        muglGetProcAddress("glSpecializeShader");
 
     initialized++;
 }
