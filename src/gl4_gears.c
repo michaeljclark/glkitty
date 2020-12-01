@@ -45,15 +45,13 @@
 #include "linmath.h"
 #include "gl2_util.h"
 
-#define USE_SPIRV 0
+static const char* frag_shader_spir_filename = "shaders/gears.frag.spv";
+static const char* vert_shader_spir_filename = "shaders/gears.vert.spv";
+static const char* frag_shader_glsl_filename = "shaders/gears.frag";
+static const char* vert_shader_glsl_filename = "shaders/gears.vert";
 
-#if USE_SPIRV
-static const char* frag_shader_filename = "shaders/gears.frag.spv";
-static const char* vert_shader_filename = "shaders/gears.vert.spv";
-#else
-static const char* frag_shader_filename = "shaders/gears.frag";
-static const char* vert_shader_filename = "shaders/gears.vert";
-#endif
+static int use_spir = 0;
+static int help = 0;
 
 static GLfloat view_dist = -40.0f;
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;
@@ -332,8 +330,13 @@ static void init(void)
     GLuint vsh, fsh;
 
     /* shader program */
-    vsh = compile_shader(GL_VERTEX_SHADER, vert_shader_filename);
-    fsh = compile_shader(GL_FRAGMENT_SHADER, frag_shader_filename);
+    if (use_spir) {
+        vsh = compile_shader(GL_VERTEX_SHADER, vert_shader_spir_filename);
+        fsh = compile_shader(GL_FRAGMENT_SHADER, frag_shader_spir_filename);
+    } else {
+        vsh = compile_shader(GL_VERTEX_SHADER, vert_shader_glsl_filename);
+        fsh = compile_shader(GL_FRAGMENT_SHADER, frag_shader_glsl_filename);
+    }
     program = link_program_ex(vsh, fsh, prelink);
 
     /* create gear vertex and index buffers */
@@ -400,12 +403,60 @@ void key( GLFWwindow* window, int k, int s, int action, int mods )
 }
 
 /*
+ * help text
+ */
+static void print_help(int argc, char **argv)
+{
+    fprintf(stderr,
+        "Usage: %s [options]\n"
+        "\n"
+        "Options:\n"
+        "  -s, --spir                         SPIR-V binary shader modules\n"
+        "  -h, --help                         command line help\n",
+        argv[0]);
+}
+
+/*
+ * command-line option parsing
+ */
+
+static int match_opt(const char *arg, const char *opt, const char *longopt)
+{
+    return strcmp(arg, opt) == 0 || strcmp(arg, longopt) == 0;
+}
+
+static void parse_options(int argc, char **argv)
+{
+    int i = 1;
+    while (i < argc) {
+        if (match_opt(argv[i], "-s", "--spir")) {
+            use_spir++;
+            i++;
+        } else if (match_opt(argv[i], "-h", "--help")) {
+            help++;
+            i++;
+        } else {
+            fprintf(stderr, "error: unknown option: %s\n", argv[i]);
+            help++;
+            break;
+        }
+    }
+
+    if (help) {
+        print_help(argc, argv);
+        exit(1);
+    }
+}
+
+/*
  * main program
  */
 int main(int argc, char *argv[])
 {
     GLFWwindow* window;
     int width, height;
+
+    parse_options(argc, argv);
 
     if (!glfwInit())
     {
