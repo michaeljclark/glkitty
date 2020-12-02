@@ -76,8 +76,8 @@ typedef enum
 } primitive_type;
 
 static GLuint compile_shader(GLenum type, const char *filename);
-static GLuint link_program(GLuint vsh, GLuint fsh);
-static GLuint link_program_ex(GLuint vsh, GLuint fsh, void (*prelink)());
+static GLuint link_program(const GLuint *shaders, GLuint numshaders,
+    GLuint (*bindfn)(GLuint prog));
 static void vertex_buffer_create(GLuint *obj, GLenum target,
     void *data, size_t size);
 static void vertex_array_pointer(const char *attr, GLint size,
@@ -464,21 +464,16 @@ static void reflect_gl4(GLuint program, GLint *numattrs, GLint *numuniforms)
     }
 }
 
-static GLuint link_program(GLuint vsh, GLuint fsh)
+static GLuint link_program(const GLuint *shaders, GLuint numshaders,
+    GLuint (*bindfn)(GLuint prog))
 {
-    return link_program_ex(vsh, fsh, NULL);
-}
-
-static GLuint link_program_ex(GLuint vsh, GLuint fsh, void (*prelink)())
-{
-    GLuint program, n = 1;
+    GLuint program, n = 1, relink;
     GLint status, numattrs, numuniforms;
 
     program = glCreateProgram();
-    glAttachShader(program, vsh);
-    glAttachShader(program, fsh);
-
-    if (prelink) prelink();
+    for (size_t i = 0; i < numshaders; i++) {
+        glAttachShader(program, shaders[i]);
+    }
 
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &status);
@@ -494,26 +489,30 @@ static GLuint link_program_ex(GLuint vsh, GLuint fsh, void (*prelink)())
         reflect_gl4(program, &numattrs, &numuniforms);
     }
 
-#if 0
     /*
      * Note: OpenGL by default binds attributes to locations counting
      * from zero upwards. This is problematic with at least the Nvidia
-     * drvier, where zero has a special meaning. So after linking, we
-     * go through the passed attributes and re-assign their bindings
-     * starting from 1 counting upwards. We then re-link the program,
-     * as we don't know the attribute names until shader is linked.
+     * driver, where zero has a special meaning. So after linking, we
+     * call bindfn which can go through reflected attributes and assign
+     * them new indices, say starting from 1 counting upwards. We then
+     * re-link the program. bindfn is provided for this purpose. e.g.
+     *
+     * static GLuint rebind(GLuint program) {
+     *   for (size_t i = 0; i < attrs.count; i++) {
+     *     glBindAttribLocation(program, (attrs.arr[i].val = n++),
+     *       attrs.arr[i].name);
+     *   }
+     * }
      */
-    for (size_t i = 0; i < attrs.count; i++) {
-        glBindAttribLocation(program, (attrs.arr[i].val = n++),
-            attrs.arr[i].name);
+    if (bindfn && bindfn(program) == GL_TRUE) {
+        glLinkProgram(program);
+        glGetProgramiv(program, GL_LINK_STATUS, &status);
+        if (status == GL_FALSE) {
+            printf("failed to relink shader program\n");
+            exit(1);
+        }
     }
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-        printf("failed to relink shader program\n");
-        exit(1);
-    }
-#else
+
     /*
      * Note: support statically linked locations in SPIR-V modules
      * requires us to accept the locations assigned by the driver,
@@ -524,10 +523,10 @@ static GLuint link_program_ex(GLuint vsh, GLuint fsh, void (*prelink)())
     for (size_t i = 0; i < attrs.count; i++) {
         attrs.arr[i].val = glGetAttribLocation(program, attrs.arr[i].name);
     }
-#endif
 
-    glDeleteShader(vsh);
-    glDeleteShader(fsh);
+    for (size_t i = 0; i < numshaders; i++) {
+        glDeleteShader(shaders[i]);
+    }
 
     for (size_t i = 0; i < attrs.count; i++) {
         printf("attr %s = %d\n", attrs.arr[i].name, attrs.arr[i].val);

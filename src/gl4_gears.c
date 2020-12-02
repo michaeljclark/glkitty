@@ -315,11 +315,11 @@ static void animate(void)
     }
 }
 
-static void prelink(void)
+static GLuint bind(GLuint program)
 {
-    GLuint blockIndex = glGetUniformBlockIndex(program, "UBO.ubo");
+    GLuint blockIndex = glGetUniformBlockIndex(program, "UBO");
     glUniformBlockBinding(program, blockIndex, 0);
-    glBindFragDataLocation(program, 0, "outFragColor");
+    return GL_TRUE;
 }
 
 /*
@@ -327,17 +327,17 @@ static void prelink(void)
  */
 static void init(void)
 {
-    GLuint vsh, fsh;
+    GLuint shaders[2];
 
     /* shader program */
     if (use_spir) {
-        vsh = compile_shader(GL_VERTEX_SHADER, vert_shader_spir_filename);
-        fsh = compile_shader(GL_FRAGMENT_SHADER, frag_shader_spir_filename);
+        shaders[0] = compile_shader(GL_VERTEX_SHADER, vert_shader_spir_filename);
+        shaders[1] = compile_shader(GL_FRAGMENT_SHADER, frag_shader_spir_filename);
     } else {
-        vsh = compile_shader(GL_VERTEX_SHADER, vert_shader_glsl_filename);
-        fsh = compile_shader(GL_FRAGMENT_SHADER, frag_shader_glsl_filename);
+        shaders[0] = compile_shader(GL_VERTEX_SHADER, vert_shader_glsl_filename);
+        shaders[1] = compile_shader(GL_FRAGMENT_SHADER, frag_shader_glsl_filename);
     }
-    program = link_program_ex(vsh, fsh, prelink);
+    program = link_program(shaders, 2, bind);
 
     /* create gear vertex and index buffers */
     for (size_t i = 0; i < 3; i++) {
