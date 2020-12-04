@@ -467,7 +467,7 @@ static void reflect_gl4(GLuint program, GLint *numattrs, GLint *numuniforms)
 static GLuint link_program(const GLuint *shaders, GLuint numshaders,
     GLuint (*bindfn)(GLuint prog))
 {
-    GLuint program, n = 1, relink;
+    GLuint program;
     GLint status, numattrs, numuniforms;
 
     program = glCreateProgram();
