@@ -313,7 +313,7 @@ static buffer load_file(const char *filename)
     char *buf;
     size_t nread;
 
-    if ((f = fopen(filename, "r")) == NULL) {
+    if ((f = fopen(filename, "rb")) == NULL) {
         printf("gears_create_shader_from_file: open: %s: %s",
             filename, strerror(errno));
         exit(1);
