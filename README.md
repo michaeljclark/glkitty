@@ -16,11 +16,14 @@ tractible for small self-contained demos running with _kitty_.
 ## Project Structure
 
 - `src/gl1_gears.c` - original GLFW port of the public domain gears demo.
-- `src/gl2_gears.c` - OpenGLES2 port of the public domain gears demo.
-- `src/gl2_util.h` - header functions for OpenGL ES2 buffers and shaders.
-- `src/kitty_gears.c` - OS Mesa kitty port of the public domain gears demo.
-- `src/kitty_util.h` - kitty and terminal request response and IO helpers.
+- `src/gl2_gears.c` - OpenGL 2.x port of the public domain gears demo.
+- `src/gl3_gears.c` - OpenGL 3.x port of the public domain gears demo.
+- `src/gl4_gears.c` - OpenGL 4.x port of the public domain gears demo.
+- `src/vk1_gears.c` - Vulkan 1.x port of the public domain gears demo.
 - `src/linmath.h` - public domain linear algebra header functions.
+- `src/gl2_util.h` - header functions for OpenGL ES2 buffers and shaders.
+- `src/kitty_util.h` - kitty and terminal request response and IO helpers.
+- `src/kitty_gears.c` - OS Mesa kitty port of the public domain gears demo.
 
 ## Examples
 
