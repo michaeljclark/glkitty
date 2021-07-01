@@ -26,7 +26,6 @@ endif (HAVE_LIB_M)
 
 find_package(PkgConfig)
 pkg_check_modules(OSMESA REQUIRED osmesa)
-pkg_check_modules(GLFW3 REQUIRED glfw3)
 pkg_check_modules(ZLIB REQUIRED zlib)
 pkg_check_modules(VULKAN REQUIRED vulkan)
 
@@ -91,6 +90,8 @@ if (EXTERNAL_GLFW)
     link_directories(${GLFW_LIBRARY_DIR})
     set(GLFW_LIBS_ALL ${GLFW_LIBRARIES} ${EXTRA_LIBS})
 else ()
+    pkg_check_modules(GLFW3 REQUIRED glfw3)
+
     add_definitions(${GLFW3_CFLAGS})
     set(GLFW_LIBS_ALL ${GLFW3_LDFLAGS} ${EXTRA_LIBS})
 endif ()

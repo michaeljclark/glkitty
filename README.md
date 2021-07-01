@@ -79,7 +79,7 @@ The project has been tested on Ubuntu 20.04.1 LTS (Focal Fossa).
 Use the following command to install dependencies on _Ubuntu 20.04_:
 
 ```
-sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev libvulkan-dev
+sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev libvulkan-dev xorg-dev
 ```
 
 #### Building the demo
