@@ -25,26 +25,17 @@ if (HAVE_LIB_M)
 endif (HAVE_LIB_M)
 
 find_package(PkgConfig)
-pkg_check_modules(OSMESA REQUIRED osmesa)
-pkg_check_modules(ZLIB REQUIRED zlib)
-pkg_check_modules(VULKAN REQUIRED vulkan)
+pkg_check_modules(OSMESA osmesa)
+pkg_check_modules(ZLIB zlib)
+pkg_check_modules(VULKAN vulkan)
 
 # Find OpenGL library
 include(FindOpenGL)
 
 # set defaults for options
-set (OSMESA_EXAMPLES_DEFAULT ON)
-set (OPENGL_EXAMPLES_DEFAULT ON)
-set (VULKAN_EXAMPLES_DEFAULT ON)
-if (NOT OSMESA_FOUND)
-    set (OSMESA_EXAMPLES_DEFAULT OFF)
-endif ()
-if (NOT OpenGL_OpenGL_FOUND)
-    set (OPENGL_EXAMPLES_DEFAULT OFF)
-endif ()
-if (NOT VULKAN_FOUND)
-    set (VULKAN_EXAMPLES_DEFAULT OFF)
-endif ()
+set (OSMESA_EXAMPLES_DEFAULT ${OSMESA_FOUND})
+set (OPENGL_EXAMPLES_DEFAULT ${OpenGL_OpenGL_FOUND})
+set (VULKAN_EXAMPLES_DEFAULT ${VULKAN_FOUND})
 
 # user configurable options
 option(OSMESA_EXAMPLES "Build OSMesa examples" ${OSMESA_EXAMPLES_DEFAULT})
