@@ -50,6 +50,14 @@ message(STATUS "VULKAN_EXAMPLES = ${VULKAN_EXAMPLES}")
 message(STATUS "EXTERNAL_GLFW = ${EXTERNAL_GLFW}")
 message(STATUS "EXTERNAL_GLAD = ${EXTERNAL_GLAD}")
 
+# Add Apple libraries on macOS
+if(APPLE)
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+  find_library(IOKIT_LIBRARY IOKit)
+  find_library(COCOA_LIBRARY Cocoa)
+  list(APPEND GLFW_LIBS_ALL ${COREFOUNDATION_LIBRARY} ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
+endif()
+
 # Add OSMesa library and flags if found
 if (OSMESA_FOUND)
     add_definitions(${OSMESA_CFLAGS})
@@ -79,12 +87,12 @@ if (EXTERNAL_GLFW)
     set(GLFW_LIBRARIES glfw3 pthread dl)
     include_directories(${GLFW_INCLUDE_DIRS})
     link_directories(${GLFW_LIBRARY_DIR})
-    set(GLFW_LIBS_ALL ${GLFW_LIBRARIES} ${EXTRA_LIBS})
+    list(APPEND GLFW_LIBS_ALL ${GLFW_LIBRARIES} ${EXTRA_LIBS})
 else ()
     pkg_check_modules(GLFW3 REQUIRED glfw3)
 
     add_definitions(${GLFW3_CFLAGS})
-    set(GLFW_LIBS_ALL ${GLFW3_LDFLAGS} ${EXTRA_LIBS})
+    list(APPEND GLFW_LIBS_ALL ${GLFW3_LDFLAGS} ${EXTRA_LIBS})
 endif ()
 
 # Support for external glad
