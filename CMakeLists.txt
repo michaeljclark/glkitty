@@ -18,6 +18,9 @@
 cmake_minimum_required (VERSION 3.12)
 project(glkitty VERSION 0.0.1)
 
+set (VULKAN_SDK "/opt/vulkan/1.2.182.0/x86_64")
+set (SHADER_DIR shaders)
+
 include(CheckLibraryExists)
 check_library_exists(m sqrtf "" HAVE_LIB_M)
 if (HAVE_LIB_M)
@@ -32,10 +35,20 @@ pkg_check_modules(VULKAN vulkan)
 # Find OpenGL library
 include(FindOpenGL)
 
+# Find Vulkan library
+include(FindVulkan)
+if (NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+    find_program (GLSL_LANG_VALIDATOR NAMES glslangValidator PATHS ${VULKAN_SDK}/bin)
+    set(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE "${GLSL_LANG_VALIDATOR}")
+endif()
+
 # set defaults for options
 set (OSMESA_EXAMPLES_DEFAULT ${OSMESA_FOUND})
 set (OPENGL_EXAMPLES_DEFAULT ${OpenGL_OpenGL_FOUND})
-set (VULKAN_EXAMPLES_DEFAULT ${VULKAN_FOUND})
+set (VULKAN_EXAMPLES_DEFAULT ${Vulkan_FOUND})
+if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+    set (VULKAN_EXAMPLES_DEFAULT OFF)
+endif()
 
 # user configurable options
 option(OSMESA_EXAMPLES "Build OSMesa examples" ${OSMESA_EXAMPLES_DEFAULT})
@@ -152,27 +165,15 @@ endif (OPENGL_EXAMPLES)
 #    ▐██▘    ▐█▄▄█▜▌     █▙▄▄   ▐█   ▜▙  ▜█▄▄▟▛█▌  █▌   ▐▌
 #    ▝██      ▜██▘▐▌     ▝███   ▐█   ▝█▌  ▜██▀ █▌  █▌   ▐▌
 
-set (VULKAN_SDK "/opt/vulkan/1.2.154.0/x86_64")
-find_program (GLSL_LANG_VALIDATOR NAMES glslangValidator PATHS ${VULKAN_SDK}/bin)
-set (SHADER_DIR shaders)
-
-if(NOT VULKAN_FOUND)
-    message("Vulkan library not found")
-    set(VULKAN_EXAMPLES 0)
-elseif(NOT GLSL_LANG_VALIDATOR)
-    message("glslangValidator not found")
-    set(VULKAN_EXAMPLES 0)
-endif()
-
 if (VULKAN_EXAMPLES)
-    file(GLOB_RECURSE VERTEX_SHADER_SOURCE "${SHADER_DIR}/*.vert")
-    file(GLOB_RECURSE FRAGMENT_SHADER_SOURCE "${SHADER_DIR}/*.frag")
+    file(GLOB_RECURSE VERTEX_SHADER_SOURCE "${SHADER_DIR}/*.v450.vert")
+    file(GLOB_RECURSE FRAGMENT_SHADER_SOURCE "${SHADER_DIR}/*.v450.frag")
     set(SHADER_SOURCE ${VERTEX_SHADER_SOURCE} ${FRAGMENT_SHADER_SOURCE})
     source_group("shaders" FILES ${SHADER_SOURCE})
 
     foreach(shader ${SHADER_SOURCE})
         add_custom_command(OUTPUT ${shader}.spv DEPENDS ${shader}
-            COMMAND ${GLSL_LANG_VALIDATOR} -V ${shader} -o ${shader}.spv)
+            COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} -V ${shader} -o ${shader}.spv)
         list(APPEND SHADERS ${shader}.spv)
     endforeach(shader)
 

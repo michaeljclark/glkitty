@@ -50,8 +50,8 @@
 #include <vulkan/vulkan_core.h>
 #include <GLFW/glfw3.h>
 
-static const char* frag_shader_filename = "shaders/gears.frag.spv";
-static const char* vert_shader_filename = "shaders/gears.vert.spv";
+static const char* frag_shader_filename = "shaders/gears.v450.frag.spv";
+static const char* vert_shader_filename = "shaders/gears.v450.vert.spv";
 
 typedef unsigned uint;
 
@@ -511,10 +511,6 @@ static void gears_create_window(gears_app *app)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwSetErrorCallback(gears_glfw_error);
-
-    glfwWindowHint(GLFW_DEPTH_BITS, 16);
-    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-
     app->window = glfwCreateWindow(app->width, app->height, "VK1 Gears",
         NULL, NULL);
     if (!app->window) {
@@ -1409,19 +1405,19 @@ static void gears_create_pipeline(gears_app *app)
     };
     const VkVertexInputAttributeDescription va[4] = {
         {
-            .location = 1,
+            .location = 0,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32_SFLOAT,
             .offset = offsetof(gears_vertex,pos),
         },
         {
-            .location = 2,
+            .location = 1,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32_SFLOAT,
             .offset = offsetof(gears_vertex,norm),
         },
         {
-            .location = 4,
+            .location = 2,
             .binding = 0,
             .format = VK_FORMAT_R32G32B32A32_SFLOAT,
             .offset = offsetof(gears_vertex,col),
@@ -1847,9 +1843,9 @@ static void gears_reset_command_buffers(gears_app *app)
 static void gears_record_command_buffers(gears_app *app, size_t j)
 {
     VkClearValue clear_values[] = {
-        { .color = { { 0.0f, 0.0f, 0.0f, 0.0f } } },
+        { .color = { { 0.0f, 0.0f, 0.0f, 1.0f } } },
         { .depthStencil = { .depth = 1.0f, .stencil = 0 } },
-        { .color = { { 0.0f, 0.0f, 0.0f, 0.0f } } },
+        { .color = { { 0.0f, 0.0f, 0.0f, 1.0f } } },
     };
 
     VkRenderPassBeginInfo pass = {

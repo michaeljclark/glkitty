@@ -45,8 +45,8 @@
 #include "linmath.h"
 #include "gl2_util.h"
 
-static const char* frag_shader_filename = "shaders/gears.fsh";
-static const char* vert_shader_filename = "shaders/gears.vsh";
+static const char* frag_shader_filename = "shaders/gears.v150.fsh";
+static const char* vert_shader_filename = "shaders/gears.v150.vsh";
 
 static GLfloat view_dist = -40.0f;
 static GLfloat view_rotx = 20.f, view_roty = 30.f, view_rotz = 0.f;

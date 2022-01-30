@@ -1,4 +1,4 @@
-#version 140
+#version 150
 
 in vec3 a_pos;
 in vec3 a_normal;

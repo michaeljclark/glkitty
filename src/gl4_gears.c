@@ -45,10 +45,10 @@
 #include "linmath.h"
 #include "gl2_util.h"
 
-static const char* frag_shader_spir_filename = "shaders/gears.frag.spv";
-static const char* vert_shader_spir_filename = "shaders/gears.vert.spv";
-static const char* frag_shader_glsl_filename = "shaders/gears.frag";
-static const char* vert_shader_glsl_filename = "shaders/gears.vert";
+static const char* frag_shader_spir_filename = "shaders/gears.v450.frag.spv";
+static const char* vert_shader_spir_filename = "shaders/gears.v450.vert.spv";
+static const char* frag_shader_glsl_filename = "shaders/gears.v450.frag";
+static const char* vert_shader_glsl_filename = "shaders/gears.v450.vert";
 
 static int use_spir = 0;
 static int help = 0;
