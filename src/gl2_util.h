@@ -326,7 +326,7 @@ static buffer load_file(const char *filename)
     buf = (char*)malloc(statbuf.st_size);
     if ((nread = fread(buf, 1, statbuf.st_size, f)) != statbuf.st_size) {
         printf("gears_create_shader_from_file: fread: %s: expected %zu got %zu\n",
-            filename, statbuf.st_size, nread);
+            filename, (size_t)statbuf.st_size, nread);
         exit(1);
     }
     return (buffer){buf, (size_t)statbuf.st_size};
