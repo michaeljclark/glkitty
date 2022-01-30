@@ -129,8 +129,8 @@ typedef struct gears_app_gear
 typedef struct gears_app
 {
     const char* name;
-    uint32_t width;
-    uint32_t height;
+    int width;
+    int height;
     GLFWwindow* window;
     VkSurfaceKHR surface;
     VkInstance instance;
@@ -166,13 +166,13 @@ typedef struct gears_app
     float view_dist;
     gears_view_rotation rotation;
     gears_app_gear gear[3];
-    uint32_t max_swapchain_images;
-    uint32_t max_samples;
-    uint32_t verbose_enable;
-    uint32_t animation_enable;
-    uint32_t multisampling_enable;
-    uint32_t validation_enable;
-    uint32_t api_dump_enable;
+    int max_swapchain_images;
+    int max_samples;
+    int verbose_enable;
+    int animation_enable;
+    int multisampling_enable;
+    int validation_enable;
+    int api_dump_enable;
 } gears_app;
 
 typedef enum {
@@ -410,14 +410,14 @@ static void gears_init_app(gears_app *app, const char *app_name,
 typedef struct commandline_option
 {
     const char* name;
-    uint32_t *ptr_boolean;
-    uint32_t *ptr_integer;
+    int *ptr_boolean;
+    int *ptr_integer;
 } commandline_option;
 
 static void gears_parse_options(gears_app *app, const int argc, const char **argv)
 {
-    uint32_t v = 1;
-    uint32_t print_help = 0;
+    int v = 1;
+    int print_help = 0;
 
     /* assert(strlen(some_spaces)) >=
        max(strlen(options[n].name)) for n in length(options) */
@@ -2028,7 +2028,7 @@ static void gears_run(gears_app *app)
         gears_print_info_verbose(app);
     }
 
-    int j = 0, k;
+    uint32_t j = 0, k;
     while (!glfwWindowShouldClose(app->window)) {
         glfwPollEvents();
 
