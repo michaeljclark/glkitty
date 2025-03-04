@@ -49,8 +49,8 @@
 #include "gl2_util.h"
 #include "kitty_util.h"
 
-static const char* frag_shader_filename = "shaders/gears.fsh";
-static const char* vert_shader_filename = "shaders/gears.vsh";
+static const char* frag_shader_filename = "shaders/gears.v150.fsh";
+static const char* vert_shader_filename = "shaders/gears.v150.vsh";
 
 static uint width = 256, height = 256;
 static uint count = 1000;
