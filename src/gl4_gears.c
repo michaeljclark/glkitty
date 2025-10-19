@@ -43,7 +43,7 @@
 #include <GLFW/glfw3.h>
 
 #include "linmath.h"
-#include "gl2_util.h"
+#include "gl2_nano.h"
 
 static const char* frag_shader_spir_filename = "shaders/gears.v450.frag.spv";
 static const char* vert_shader_spir_filename = "shaders/gears.v450.vert.spv";

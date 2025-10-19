@@ -43,7 +43,7 @@
 #include <GLFW/glfw3.h>
 
 #include "linmath.h"
-#include "gl2_util.h"
+#include "gl2_nano.h"
 
 static const char* frag_shader_filename = "shaders/gears.v150.fsh";
 static const char* vert_shader_filename = "shaders/gears.v150.vsh";

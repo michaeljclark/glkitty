@@ -9,7 +9,7 @@ Port of the OpenGL gears demo to kitty terminal graphics protocol.
 _glkitty_ is a nano framework for creating kitty terminal apps that send
 image data to kitty using the kitty terminal graphics protocol.
 
-_kitty_gears_ is a demo app for  _kitty_util.h_ and _gl2_util.h_ which
+_kitty_gears_ is a demo app for  _kitty_util.h_ and _gl2_nano.h_ which
 are designed to make using the OpenGL ES2 programmable shader pipeline
 tractible for small self-contained demos running with _kitty_.
 
@@ -21,7 +21,7 @@ tractible for small self-contained demos running with _kitty_.
 - `src/gl4_gears.c` - OpenGL 4.5 port of the public domain gears demo.
 - `src/vk1_gears.c` - Vulkan 1.1 port of the public domain gears demo.
 - `src/linmath.h` - public domain linear algebra header functions.
-- `src/gl2_util.h` - header functions for OpenGL ES2 buffers and shaders.
+- `src/gl2_nano.h` - header functions for OpenGL ES2 buffers and shaders.
 - `src/kitty_util.h` - kitty and terminal request response and IO helpers.
 - `src/kitty_gears.c` - OS Mesa kitty port of the public domain gears demo.
 
@@ -47,7 +47,7 @@ code is derived from the gears port included with GLFW.
 
 _gl2_gears_ is the OpenGL 2.x port of gears using GLSL shaders.
 It has been ported to use Wolfgang Draxinger's `"linmath.h"` `mat4x4`
-for constructing the model, view and projection matrices. `"gl2_util.h"`
+for constructing the model, view and projection matrices. `"gl2_nano.h"`
 contains shader loading and a simple vertex and index buffer implementation.
 
 ### gl3_gears
@@ -125,6 +125,6 @@ cmake --build build
 ## Licensing Information
 
 - Mesa gears is public domain software, Brian Paul et al.
-- gl2_util header is ISC license, Michael Clark.
-- kitty_util header is please license, Michael Clark.
+- gl2_nano.h header is ISC license, Michael Clark.
+- kitty_util.h header is please license, Michael Clark.
 - base64_encode is public domain software, Jon Mayo.
