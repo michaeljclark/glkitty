@@ -314,8 +314,8 @@ static void init(void)
     glGenVertexArrays(3, vao);
     for (size_t i = 0; i < 3; i++) {
         glBindVertexArray(vao[i]);
-        vertex_buffer_create(&vbo[i], GL_ARRAY_BUFFER, vb[i].data, vb[i].count * sizeof(vertex));
-        vertex_buffer_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib[i].data, ib[i].count * sizeof(uint));
+        buffer_object_create(&vbo[i], GL_ARRAY_BUFFER, vb + i);
+        buffer_object_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib + i);
         vertex_array_pointer("a_pos", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,pos));
         vertex_array_pointer("a_normal", 3, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,norm));
         vertex_array_pointer("a_uv", 2, GL_FLOAT, 0, sizeof(vertex), offsetof(vertex,uv));

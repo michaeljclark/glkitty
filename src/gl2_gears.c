@@ -316,8 +316,8 @@ static void init(void)
 
     /* create vertex array, vertex buffer and index buffer objects */
     for (size_t i = 0; i < 3; i++) {
-        vertex_buffer_create(&vbo[i], GL_ARRAY_BUFFER, vb[i].data, vb[i].count * sizeof(vertex));
-        vertex_buffer_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib[i].data, ib[i].count * sizeof(uint));
+        buffer_object_create(&vbo[i], GL_ARRAY_BUFFER, vb + i);
+        buffer_object_create(&ibo[i], GL_ELEMENT_ARRAY_BUFFER, ib + i);
     }
 
     /* set light position uniform */

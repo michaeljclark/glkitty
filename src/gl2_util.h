@@ -22,9 +22,21 @@
 
 typedef unsigned uint;
 
+typedef union { int vec[2]; struct { int x, y;       }; struct { int r, g;       }; } vec2i;
+typedef union { int vec[3]; struct { int x, y, z;    }; struct { int r, g, b;    }; } vec3i;
+typedef union { int vec[4]; struct { int x, y, z, w; }; struct { int r, g, b, a; }; } vec4i;
+
+typedef union { uint vec[2]; struct { uint x, y;       }; struct { uint r, g;       }; } vec2ui;
+typedef union { uint vec[3]; struct { uint x, y, z;    }; struct { uint r, g, b;    }; } vec3ui;
+typedef union { uint vec[4]; struct { uint x, y, z, w; }; struct { uint r, g, b, a; }; } vec4ui;
+
 typedef union { float vec[2]; struct { float x, y;       }; struct { float r, g;       }; } vec2f;
 typedef union { float vec[3]; struct { float x, y, z;    }; struct { float r, g, b;    }; } vec3f;
 typedef union { float vec[4]; struct { float x, y, z, w; }; struct { float r, g, b, a; }; } vec4f;
+
+typedef union { double vec[2]; struct { double x, y;       }; struct { double r, g;       }; } vec2d;
+typedef union { double vec[3]; struct { double x, y, z;    }; struct { double r, g, b;    }; } vec3d;
+typedef union { double vec[4]; struct { double x, y, z, w; }; struct { double r, g, b, a; }; } vec4d;
 
 typedef struct
 {
@@ -55,17 +67,14 @@ typedef struct
 
 typedef struct
 {
-    size_t total;
+    size_t stride;
+    size_t capacity;
     size_t count;
-    vertex *data;
-} vertex_buffer;
+    char *data;
+} array_buffer;
 
-typedef struct
-{
-    size_t total;
-    size_t count;
-    uint *data;
-} index_buffer;
+typedef array_buffer vertex_buffer;
+typedef array_buffer index_buffer;
 
 typedef enum
 {
@@ -87,13 +96,22 @@ static void uniform_1i(const char *uniform, GLint i);
 static void uniform_3f(const char *uniform, GLfloat v1, GLfloat v2, GLfloat v3);
 static void uniform_matrix_4fv(const char *uniform, const GLfloat *mat);
 
+static void array_buffer_init(array_buffer *sb,
+    size_t stride, size_t capacity);
+static void array_buffer_destroy(array_buffer *sb);
+static void* array_buffer_data(array_buffer *sb);
+static size_t array_buffer_size(array_buffer *sb);
+static size_t array_buffer_stride(array_buffer *sb);
+static uint array_buffer_count(array_buffer *sb);
+static void array_buffer_resize(array_buffer *sb, size_t count);
+static uint array_buffer_add(array_buffer *sb, void *data);
+
 static void vertex_buffer_init(vertex_buffer *vb);
 static void vertex_buffer_destroy(vertex_buffer *vb);
 static void* vertex_buffer_data(vertex_buffer *vb);
 static size_t vertex_buffer_size(vertex_buffer *vb);
 static uint vertex_buffer_count(vertex_buffer *vb);
-static uint vertex_buffer_add(vertex_buffer *vb,
-    vertex vertex);
+static uint vertex_buffer_add(vertex_buffer *vb, vertex vertex);
 
 static void index_buffer_init(index_buffer *ib);
 static void index_buffer_destroy(index_buffer *ib);
@@ -106,50 +124,93 @@ static void index_buffer_add_primitves(index_buffer *ib,
     primitive_type type, uint count, uint addend);
 
 /*
- * vertex and index buffer implementation
+ * vertex, index and generic array buffer implementation
  */
 
 enum { VERTEX_BUFFER_INITIAL_COUNT = 16 };
+enum { INDEX_BUFFER_INITIAL_COUNT = 64 };
+
+static void array_buffer_init(array_buffer *sb, size_t stride, size_t capacity)
+{
+    sb->stride = stride;
+    sb->capacity = capacity;
+    sb->count = 0;
+    sb->data = (char*)malloc(sb->stride * sb->capacity);
+}
+
+static void array_buffer_destroy(array_buffer *sb)
+{
+    free(sb->data);
+    sb->data = NULL;
+}
+
+static uint array_buffer_count(array_buffer *sb)
+{
+    return (uint)sb->count;
+}
+
+static void* array_buffer_data(array_buffer *sb)
+{
+    return sb->data;
+}
+
+static size_t array_buffer_stride(array_buffer *sb)
+{
+    return sb->stride;
+}
+
+static size_t array_buffer_size(array_buffer *sb)
+{
+    return sb->count * sb->stride;
+}
+
+static void array_buffer_resize(array_buffer *sb, size_t count)
+{
+    size_t capacity = sb->capacity;
+    while (count > capacity) capacity <<= 1;
+    if (capacity > sb->capacity) {
+        sb->data = (char*)realloc(sb->data, sb->stride * capacity);
+        sb->capacity = capacity;
+    }
+    sb->count = count;
+}
+
+static uint array_buffer_add(array_buffer *sb, void *data)
+{
+    size_t idx = sb->count;
+    array_buffer_resize(sb, idx + 1);
+    memcpy(sb->data + (idx * sb->stride), data, sb->stride);
+    return (uint)idx;
+}
 
 static void vertex_buffer_init(vertex_buffer *vb)
 {
-    vb->total = VERTEX_BUFFER_INITIAL_COUNT;
-    vb->count = 0;
-    vb->data = (vertex*)malloc(sizeof(vertex) * vb->total);
+    array_buffer_init(vb, sizeof(vertex), VERTEX_BUFFER_INITIAL_COUNT);
 }
 
 static void vertex_buffer_destroy(vertex_buffer *vb)
 {
-    free(vb->data);
-    vb->data = NULL;
+    array_buffer_destroy(vb);
 }
 
 static uint vertex_buffer_count(vertex_buffer *vb)
 {
-    return vb->count;
+    return array_buffer_count(vb);
 }
 
 static void* vertex_buffer_data(vertex_buffer *vb)
 {
-    return vb->data;
+    return array_buffer_data(vb);
 }
 
 static size_t vertex_buffer_size(vertex_buffer *vb)
 {
-    return vb->count * sizeof(vertex);
+    return array_buffer_size(vb);
 }
 
-static uint vertex_buffer_add(vertex_buffer *vb,
-    vertex v)
+static uint vertex_buffer_add(vertex_buffer *vb, vertex v)
 {
-    if (vb->count >= vb->total) {
-        vb->total <<= 1;
-        vb->data = (vertex*)realloc(vb->data,
-            sizeof(vertex) * vb->total);
-    }
-    uint idx = vb->count++;
-    vb->data[idx] = v;
-    return idx;
+    return array_buffer_add(vb, &v);
 }
 
 static void vertex_buffer_dump(vertex_buffer *vb)
@@ -157,7 +218,7 @@ static void vertex_buffer_dump(vertex_buffer *vb)
     size_t count = vb->count;
     printf("vertex_buffer_%p = {\n", vb);
     for (size_t i = 0; i < count; i++) {
-        vertex *v = vb->data + i;
+        vertex *v = ((vertex*)vb->data) + i;
         printf("  [%7zu] = { "
             ".pos = {%5.3f,%5.3f,%5.3f}, "
             ".norm = {%5.3f,%5.3f,%5.3f}, "
@@ -171,47 +232,41 @@ static void vertex_buffer_dump(vertex_buffer *vb)
     printf("}\n");
 }
 
-enum { INDEX_BUFFER_INITIAL_COUNT = 64 };
-
 static void index_buffer_init(index_buffer *ib)
 {
-    ib->total = INDEX_BUFFER_INITIAL_COUNT;
-    ib->count = 0;
-    ib->data = (uint*)malloc(sizeof(uint) * ib->total);
+    array_buffer_init(ib, sizeof(uint), INDEX_BUFFER_INITIAL_COUNT);
 }
 
 static void index_buffer_destroy(index_buffer *ib)
 {
-    free(ib->data);
-    ib->data = NULL;
+    array_buffer_destroy(ib);
 }
 
 static uint index_buffer_count(index_buffer *ib)
 {
-    return ib->count;
+    return array_buffer_count(ib);
 }
 
 static void* index_buffer_data(index_buffer *ib)
 {
-    return ib->data;
+    return array_buffer_data(ib);
 }
 
 static size_t index_buffer_size(index_buffer *ib)
 {
-    return ib->count * sizeof(uint);
+    return array_buffer_size(ib);
 }
 
 static void index_buffer_add(index_buffer *ib,
     const uint *data, uint count, uint addend)
 {
-    if (ib->count + count >= ib->total) {
-        do { ib->total <<= 1; }
-        while (ib->count + count > ib->total);
-        ib->data = (uint*)realloc(ib->data,
-            sizeof(uint) * ib->total);
+    if (ib->count + count >= ib->capacity) {
+        do { ib->capacity <<= 1; }
+        while (ib->count + count > ib->capacity);
+        ib->data = realloc(ib->data, sizeof(uint) * ib->capacity);
     }
     for (uint i = 0; i < count; i++) {
-        ib->data[ib->count++] = data[i] + addend;
+        ((uint*)ib->data)[ib->count++] = data[i] + addend;
     }
 }
 
@@ -259,7 +314,7 @@ static void index_buffer_dump(index_buffer *ib)
     size_t i;
     for (i = 0; i < count; i++) {
         if (i % width == 0) printf("  [%7zu] = ", i);
-        printf("%7u", ib->data[i]);
+        printf("%7u", ((uint*)ib->data)[i]);
         if (i % width == width-1) printf("\n");
     }
     if (i % width != 0) printf("\n");
@@ -313,19 +368,19 @@ static buffer load_file(const char *filename)
     char *buf;
     size_t nread;
 
-    if ((f = fopen(filename, "rb")) == NULL) {
-        printf("gears_create_shader_from_file: open: %s: %s",
+    if ((f = fopen(filename, "r")) == NULL) {
+        printf("load_file: open: %s: %s\n",
             filename, strerror(errno));
         exit(1);
     }
     if (fstat(fileno(f), &statbuf) < 0) {
-        printf("gears_create_shader_from_file: stat: %s: %s",
+        printf("load_file: stat: %s: %s\n",
             filename, strerror(errno));
         exit(1);
     }
     buf = (char*)malloc(statbuf.st_size);
     if ((nread = fread(buf, 1, statbuf.st_size, f)) != statbuf.st_size) {
-        printf("gears_create_shader_from_file: fread: %s: expected %zu got %zu\n",
+        printf("load_file: fread: %s: expected %zu got %zu\n",
             filename, (size_t)statbuf.st_size, nread);
         exit(1);
     }
@@ -386,7 +441,7 @@ static GLuint compile_shader(GLenum type, const char *filename)
     int is_spirv;
 
     buf = load_file(filename);
-    length = buf.length;
+    length = (GLint)buf.length;
     if (!length) {
         printf("failed to load shader: %s\n", filename);
         exit(1);
@@ -538,13 +593,20 @@ static GLuint link_program(const GLuint *shaders, GLuint numshaders,
     return program;
 }
 
-static void vertex_buffer_create(GLuint *obj, GLenum target,
-    void *data, size_t size)
+static void buffer_object_create_offset(GLuint *obj, GLenum target,
+    array_buffer *ab, size_t offset, size_t count)
 {
+    size_t size = array_buffer_stride(ab) * count;
+    char *data = (char*)array_buffer_data(ab) + array_buffer_stride(ab) * offset;
     glGenBuffers(1, obj);
     glBindBuffer(target, *obj);
-    glBufferData(target, size, data, GL_STATIC_DRAW);
+    glBufferData(target, size, (void*)data, GL_STATIC_DRAW);
     glBindBuffer(target, *obj);
+}
+
+static void buffer_object_create(GLuint *obj, GLenum target, array_buffer *ab)
+{
+    buffer_object_create_offset(obj, target, ab, 0, array_buffer_count(ab));
 }
 
 static void vertex_array_pointer(const char *attr, GLint size,
@@ -553,7 +615,7 @@ static void vertex_array_pointer(const char *attr, GLint size,
     GLuint val;
     if ((val = attr_list_value(&attrs, attr)) != ATTR_NOT_FOUND) {
         glEnableVertexAttribArray(val);
-        glVertexAttribPointer(val, size, type, norm, stride, (const void*)offset);
+        glVertexAttribPointer(val, size, type, norm, (GLsizei)stride, (const void*)offset);
     }
 }
 
