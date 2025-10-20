@@ -9,7 +9,7 @@ Port of the OpenGL gears demo to kitty terminal graphics protocol.
 _glkitty_ is a nano framework for creating kitty terminal apps that send
 image data to kitty using the kitty terminal graphics protocol.
 
-_kitty_gears_ is a demo app for  _kitty_util.h_ and _gl2_nano.h_ which
+_kitty_gears_ is a demo app for  _kitty_util_ and _gl2_nano_ which
 are designed to make using the OpenGL ES2 programmable shader pipeline
 tractible for small self-contained demos running with _kitty_.
 
