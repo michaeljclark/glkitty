@@ -1,6 +1,6 @@
 # glkitty
 
-Port of the OpenGL gears demo to kitty terminal graphics protocol.
+Port of the iconic OpenGL gears demo to kitty terminal graphics protocol.
 
 ![glkitty](/images/glkitty.gif)
 
