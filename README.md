@@ -87,14 +87,15 @@ sudo apt-get install -y cmake ninja-build libosmesa6-dev libopengl-dev libvulkan
 The following cmake variables control which examples are built:
 
 - `-DOSMESA_EXAMPLES=ON` - build the OSMesa examples: `kitty_gears`
-- `-DOPENGL_EXAMPLES=ON` - build the OpenGL examples: `gl1_gears`, `gl2_gears`
+- `-DOPENGL_EXAMPLES=ON` - build the OpenGL examples: `gl1_gears` ... `gl4_gears`
 - `-DVULKAN_EXAMPLES=ON` - build the Vulkan examples: `vk1_gears`
 - `-DEXTERNAL_GLFW=ON` - build using external GLFW library
 - `-DEXTERNAL_GLAD=ON` - build using external GLAD library
 
-By default, the project will build _kitty_gears_ as well as the OpenGL ports
-_gl1_gears, _gl2_gears_ and the Vulkan port _vk1_gears_. This command will
-download required dependencoes such as GLFW and build all of the examples:
+By default, the project will build _kitty_gears_, the OpenGL ports _gl1_gears_,
+_gl2_gears_, _gl3_gears_, and _gl4_gears_, plus the Vulkan port _vk1_gears_.
+This command will download all of the required dependencoes such as GLAD and
+GLFW, then build the examples:
 
 ```
 cmake -G Ninja -B build
